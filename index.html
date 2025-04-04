@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle Mileage & Service Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-image: url('car.jpg'); /* Replace with your image URL */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    .section {
+      display: none;
+      background: rgba(255, 255, 255, 0.8); /* Adds a slight white background to improve readability */
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    .active {
+      background-color: #4CAF50;
+      color: white;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10px 0;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    button {
+      padding: 8px 12px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Vehicle Mileage & Service Tracker</h1>
+
+  <!-- Vehicle Profile -->
+  <div id="vehicleProfile" class="section" style="display: block;">
+    <h2>Enter Vehicle Profile</h2>
+    <label>Vehicle Type:
+      <select id="vehicleType" onchange="updateVehicleMode()">
+        <option value="car">Car</option>
+        <option value="bike">Bike</option>
+      </select>
+    </label><br><br>
+    <label>Vehicle Mode: <input type="text" id="vehicleMode" readonly></label><br><br>
+    <label>Vehicle Name: <input type="text" id="vehicleName"></label><br><br>
+    <label>Original Mileage (KM/L): <input type="number" id="originalMileage"></label><br><br>
+    <button onclick="saveVehicleProfile()">Save Profile</button>
+  </div>
+
+  <!-- Service History -->
+  <div id="serviceHistory" class="section">
+    <h2>Service History</h2>
+    <label>Date: <input type="date" id="serviceDate"></label><br><br>
+    <label><input type="checkbox" id="engineOil"> Engine Oil Changed</label><br>
+    <label>Tire Percentage: <input type="number" id="tirePercentage"></label><br>
+    <label><input type="checkbox" id="airFilter"> Air Filter Changed</label><br>
+    <label><input type="checkbox" id="generalService"> General Service</label><br><br>
+    <button onclick="saveServiceHistory()">Save Service History</button>
+    <button onclick="goBack()">Back</button>
+    <button onclick="showSection('mileageCalculation')">Next</button>
+  </div>
+
+  <!-- Mileage Calculation -->
+  <div id="mileageCalculation" class="section">
+    <h2>Mileage Cost Calculator</h2>
+    <label>Distance (KM): <input type="number" id="distance"></label><br><br>
+    <label>Mileage (KM/L): <input type="number" id="mileage"></label><br><br>
+    <label>Fuel Cost (per Liter): <input type="number" id="fuelCost"></label><br><br>
+    <button id="petrol" onclick="setFuelType('petrol')">Petrol</button>
+    <button id="diesel" onclick="setFuelType('diesel')">Diesel</button><br><br>
+    <button onclick="calculateCost()">Calculate</button>
+    <div id="result"></div><br>
+    <button onclick="goBack()">Back</button>
+    <button onclick="showSection('overallResult')">Next</button>
+  </div>
+
+  <!-- Overall Result -->
+  <div id="overallResult" class="section">
+    <h2>Summary</h2>
+    <p><strong>Vehicle Type:</strong> <span id="vehicleTypeDisplay"></span></p>
+    <p><strong>Vehicle Name:</strong> <span id="vehicleNameDisplay"></span></p>
+    <p><strong>Original Mileage:</strong> <span id="originalMileageDisplay"></span> KM/L</p>
+
+    <h3>Car Service History</h3>
+    <table id="carHistoryTable">
+      <thead>
+        <tr><th>Date</th><th>Details</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>Bike Service History</h3>
+    <table id="bikeHistoryTable">
+      <thead>
+        <tr><th>Date</th><th>Details</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>Mileage Summary</h3>
+    <div id="mileageSummary"></div>
+
+    <button onclick="goBack()">Back</button>
+    <button onclick="updateAndDownloadExcel()">Download Excel</button>
+  </div>
+
+</body>
+</html>
