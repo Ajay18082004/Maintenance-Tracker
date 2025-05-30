@@ -6,19 +6,35 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
       background-image: url('car.jpg'); /* Replace with your image URL */
       background-size: cover;
       background-position: center;
-      background-attachment: fixed;
+      color: #FF2B2B;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 90%;
+      max-width: 500px;
+      padding: 10px;
+      border: 2px solid rgba(255, 43, 43, 0.8);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      background-color: rgba(0, 0, 0, 0.7);
+      display: block;
+      overflow: auto;
+      position: relative;
+      z-index: 1;
     }
     .section {
       display: none;
-      background: rgba(255, 255, 255, 0.8); /* Adds a slight white background to improve readability */
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
     .active {
       background-color: #4CAF50;
@@ -28,95 +44,355 @@
       border-collapse: collapse;
       width: 100%;
       margin: 10px 0;
+      color: #FF2B2B;
+      font-size: 0.8em;
     }
     table, th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #FF2B2B;
     }
     th, td {
-      padding: 10px;
-      text-align: left;
+      padding: 6px;
+      text-align: center;
     }
     button {
-      padding: 8px 12px;
-      margin: 10px 0;
+      padding: 6px;
+      margin-top: 10px;
+      background-color: #FF2B2B;
+      color: #FFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 100%;
+      font-size: 0.9em;
+    }
+    button:hover {
+      background-color: #C70000;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 2px solid #FF2B2B;
+      border-radius: 5px;
+      background-color: #222;
+      color: #f5f5dc;
+    }
+    input:focus {
+      border-color: #C70000;
+      outline: none;
+    }
+    h1, h2 {
+      color: #FF2B2B;
+      text-align: center;
+      font-size: 1.5em;
+    }
+    h3 {
+      font-size: 1.2em;
+    }
+    p {
+      font-size: 0.9em;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <h1>Vehicle Mileage & Service Tracker</h1>
+  <div class="container">
+    <h1>Vehicle Mileage & Service Tracker</h1>
 
-  <!-- Vehicle Profile -->
-  <div id="vehicleProfile" class="section" style="display: block;">
-    <h2>Enter Vehicle Profile</h2>
-    <label>Vehicle Type:
-      <select id="vehicleType" onchange="updateVehicleMode()">
-        <option value="car">Car</option>
-        <option value="bike">Bike</option>
-      </select>
-    </label><br><br>
-    <label>Vehicle Mode: <input type="text" id="vehicleMode" readonly></label><br><br>
-    <label>Vehicle Name: <input type="text" id="vehicleName"></label><br><br>
-    <label>Original Mileage (KM/L): <input type="number" id="originalMileage"></label><br><br>
-    <button onclick="saveVehicleProfile()">Save Profile</button>
+    <!-- Vehicle Profile -->
+    <div id="vehicleProfile" class="section" style="display: block;">
+      <h2>Enter Vehicle Profile</h2>
+      <label>Vehicle Type:
+        <select id="vehicleType" onchange="updateVehicleMode()">
+          <option value="car">Car</option>
+          <option value="bike">Bike</option>
+        </select>
+      </label><br><br>
+      <label>Vehicle Mode: <input type="text" id="vehicleMode" readonly></label><br><br>
+      <label>Vehicle Name: <input type="text" id="vehicleName"></label><br><br>
+      <label>Original Mileage (KM/L): <input type="number" id="originalMileage"></label><br><br>
+      <button onclick="saveVehicleProfile()">Save Profile</button>
+    </div>
+
+    <!-- Service History -->
+    <div id="serviceHistory" class="section">
+      <h2>Service History</h2>
+      <label>Date: <input type="date" id="serviceDate"></label><br><br>
+      <label><input type="checkbox" id="engineOil"> Engine Oil Changed</label><br>
+      <label>Tire Percentage: <input type="number" id="tirePercentage"></label><br>
+      <label><input type="checkbox" id="airFilter"> Air Filter Changed</label><br>
+      <label><input type="checkbox" id="generalService"> General Service</label><br><br>
+      <button onclick="saveServiceHistory()">Save Service History</button>
+      <button onclick="goBack()">Back</button>
+      <button onclick="showSection('mileageCalculation')">Next</button>
+    </div>
+
+    <!-- Mileage Calculation -->
+    <div id="mileageCalculation" class="section">
+      <h2>Mileage Cost Calculator</h2>
+      <label>Distance (KM): <input type="number" id="distance"></label><br><br>
+      <label>Mileage (KM/L): <input type="number" id="mileage"></label><br><br>
+      <label>Fuel Cost (per Liter): <input type="number" id="fuelCost"></label><br><br>
+      <button id="petrol" onclick="setFuelType('petrol')">Petrol</button>
+      <button id="diesel" onclick="setFuelType('diesel')">Diesel</button><br><br>
+      <button onclick="calculateCost()">Calculate</button>
+      <div id="result"></div><br>
+      <button onclick="goBack()">Back</button>
+      <button onclick="showSection('overallResult')">Next</button>
+    </div>
+
+    <!-- Overall Result -->
+    <div id="overallResult" class="section">
+      <h2>Summary</h2>
+      <p><strong>Vehicle Type:</strong> <span id="vehicleTypeDisplay"></span></p>
+      <p><strong>Vehicle Name:</strong> <span id="vehicleNameDisplay"></span></p>
+      <p><strong>Original Mileage:</strong> <span id="originalMileageDisplay"></span> KM/L</p>
+
+      <h3>Car Service History</h3>
+      <table id="carHistoryTable">
+        <thead>
+          <tr><th>Date</th><th>Details</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>Bike Service History</h3>
+      <table id="bikeHistoryTable">
+        <thead>
+          <tr><th>Date</th><th>Details</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>Mileage Summary</h3>
+      <div id="mileageSummary"></div>
+
+      <button onclick="goBack()">Back</button>
+      <button onclick="updateAndDownloadExcel()">Download Excel</button>
+    </div>
   </div>
 
-  <!-- Service History -->
-  <div id="serviceHistory" class="section">
-    <h2>Service History</h2>
-    <label>Date: <input type="date" id="serviceDate"></label><br><br>
-    <label><input type="checkbox" id="engineOil"> Engine Oil Changed</label><br>
-    <label>Tire Percentage: <input type="number" id="tirePercentage"></label><br>
-    <label><input type="checkbox" id="airFilter"> Air Filter Changed</label><br>
-    <label><input type="checkbox" id="generalService"> General Service</label><br><br>
-    <button onclick="saveServiceHistory()">Save Service History</button>
-    <button onclick="goBack()">Back</button>
-    <button onclick="showSection('mileageCalculation')">Next</button>
-  </div>
+  <script>
+    let vehicleProfile = {};
+    let carServiceHistory = [];
+    let bikeServiceHistory = [];
+    let mileageData = [];
+    let workbook;
+    let fuelType = 'petrol';
 
-  <!-- Mileage Calculation -->
-  <div id="mileageCalculation" class="section">
-    <h2>Mileage Cost Calculator</h2>
-    <label>Distance (KM): <input type="number" id="distance"></label><br><br>
-    <label>Mileage (KM/L): <input type="number" id="mileage"></label><br><br>
-    <label>Fuel Cost (per Liter): <input type="number" id="fuelCost"></label><br><br>
-    <button id="petrol" onclick="setFuelType('petrol')">Petrol</button>
-    <button id="diesel" onclick="setFuelType('diesel')">Diesel</button><br><br>
-    <button onclick="calculateCost()">Calculate</button>
-    <div id="result"></div><br>
-    <button onclick="goBack()">Back</button>
-    <button onclick="showSection('overallResult')">Next</button>
-  </div>
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.getElementById(sectionId).style.display = 'block';
+      if (sectionId === 'overallResult') {
+        document.getElementById('vehicleTypeDisplay').textContent = vehicleProfile.type;
+        document.getElementById('vehicleNameDisplay').textContent = vehicleProfile.name;
+        document.getElementById('originalMileageDisplay').textContent = vehicleProfile.mileage;
+        displayOverallHistory();
+        displayMileageSummary();
+      }
+    }
 
-  <!-- Overall Result -->
-  <div id="overallResult" class="section">
-    <h2>Summary</h2>
-    <p><strong>Vehicle Type:</strong> <span id="vehicleTypeDisplay"></span></p>
-    <p><strong>Vehicle Name:</strong> <span id="vehicleNameDisplay"></span></p>
-    <p><strong>Original Mileage:</strong> <span id="originalMileageDisplay"></span> KM/L</p>
+    function goBack() {
+      const currentSectionId = document.querySelector('.section[style="display: block;"]').id;
+      if (currentSectionId === 'serviceHistory') showSection('vehicleProfile');
+      else if (currentSectionId === 'mileageCalculation') showSection('serviceHistory');
+      else if (currentSectionId === 'overallResult') showSection('mileageCalculation');
+    }
 
-    <h3>Car Service History</h3>
-    <table id="carHistoryTable">
-      <thead>
-        <tr><th>Date</th><th>Details</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    function updateVehicleMode() {
+      const vehicleType = document.getElementById('vehicleType').value;
+      document.getElementById('vehicleMode').value = vehicleType === 'bike' ? 'Bike' : '';
+    }
 
-    <h3>Bike Service History</h3>
-    <table id="bikeHistoryTable">
-      <thead>
-        <tr><th>Date</th><th>Details</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    function saveVehicleProfile() {
+      vehicleProfile = {
+        mode: document.getElementById('vehicleMode').value,
+        name: document.getElementById('vehicleName').value,
+        mileage: Number(document.getElementById('originalMileage').value),
+        type: document.getElementById('vehicleType').value
+      };
+      localStorage.setItem('vehicleProfile', JSON.stringify(vehicleProfile));
+      alert('Vehicle Profile Saved!');
+      showSection('serviceHistory');
+    }
 
-    <h3>Mileage Summary</h3>
-    <div id="mileageSummary"></div>
+    function saveServiceHistory() {
+      const serviceDate = document.getElementById('serviceDate').value;
+      const engineOilChanged = document.getElementById('engineOil').checked;
+      const tirePercentage = document.getElementById('tirePercentage').value;
+      const airFilterChanged = document.getElementById('airFilter').checked;
+      const generalService = document.getElementById('generalService').checked;
 
-    <button onclick="goBack()">Back</button>
-    <button onclick="updateAndDownloadExcel()">Download Excel</button>
-  </div>
+      if (!serviceDate) {
+        alert('Please enter a valid date.');
+        return;
+      }
+
+      const serviceData = {
+        date: serviceDate,
+        details: {
+          engineOilChanged,
+          tirePercentage,
+          airFilterChanged,
+          generalService
+        }
+      };
+
+      if (vehicleProfile.type === 'car') {
+        carServiceHistory.push(serviceData);
+        localStorage.setItem('carServiceHistory', JSON.stringify(carServiceHistory));
+        alert('Car Service History Saved!');
+      } else {
+        bikeServiceHistory.push(serviceData);
+        localStorage.setItem('bikeServiceHistory', JSON.stringify(bikeServiceHistory));
+        alert('Bike Service History Saved!');
+      }
+
+      clearServiceHistoryInputs();
+    }
+
+    function clearServiceHistoryInputs() {
+      document.getElementById('serviceDate').value = '';
+      document.getElementById('engineOil').checked = false;
+      document.getElementById('tirePercentage').value = '';
+      document.getElementById('airFilter').checked = false;
+      document.getElementById('generalService').checked = false;
+    }
+
+    function setFuelType(type) {
+      fuelType = type;
+      document.getElementById('petrol').classList.remove('active');
+      document.getElementById('diesel').classList.remove('active');
+      document.getElementById(type).classList.add('active');
+    }
+
+    function calculateCost() {
+      let distance = parseFloat(document.getElementById('distance').value);
+      let mileage = parseFloat(document.getElementById('mileage').value);
+      let fuelCost = parseFloat(document.getElementById('fuelCost').value);
+
+      if (distance <= 0 || mileage <= 0 || fuelCost <= 0) {
+        document.getElementById('result').innerText = "Please enter valid values!";
+        return;
+      }
+
+      let dailyCost = (distance / mileage) * fuelCost;
+      let monthlyCost = dailyCost * 30;
+      let yearlyCost = dailyCost * 365;
+
+      document.getElementById('result').innerHTML = `
+        <table>
+          <tr><td>Daily Fuel Cost:</td><td>₹${dailyCost.toFixed(2)}</td></tr>
+          <tr><td>Monthly Fuel Cost:</td><td>₹${monthlyCost.toFixed(2)}</td></tr>
+          <tr><td>Yearly Fuel Cost:</td><td>₹${yearlyCost.toFixed(2)}</td></tr>
+        </table>
+      `;
+
+      mileageData.push({
+        distance, mileage, fuelCost, dailyCost, monthlyCost, yearlyCost
+      });
+    }
+
+    function displayOverallHistory() {
+      const carHistoryTable = document.getElementById('carHistoryTable').getElementsByTagName('tbody')[0];
+      const bikeHistoryTable = document.getElementById('bikeHistoryTable').getElementsByTagName('tbody')[0];
+      carHistoryTable.innerHTML = '';
+      bikeHistoryTable.innerHTML = '';
+
+      carServiceHistory.forEach(service => {
+        const row = carHistoryTable.insertRow();
+        row.insertCell(0).textContent = service.date;
+        row.insertCell(1).textContent = formatServiceDetails(service.details);
+      });
+
+      bikeServiceHistory.forEach(service => {
+        const row = bikeHistoryTable.insertRow();
+        row.insertCell(0).textContent = service.date;
+        row.insertCell(1).textContent = formatServiceDetails(service.details);
+      });
+    }
+
+    function formatServiceDetails(details) {
+      return `Engine Oil Changed: ${details.engineOilChanged ? 'Yes' : 'No'}, 
+      Tire Percentage: ${details.tirePercentage}%, 
+      Air Filter Changed: ${details.airFilterChanged ? 'Yes' : 'No'}, 
+      General Service: ${details.generalService ? 'Yes' : 'No'}`;
+    }
+
+    function displayMileageSummary() {
+      const mileageSummaryDiv = document.getElementById('mileageSummary');
+      mileageSummaryDiv.innerHTML = '';
+      if (mileageData.length === 0) {
+        mileageSummaryDiv.innerHTML = '<p>No mileage data available.</p>';
+        return;
+      }
+
+      mileageData.forEach(data => {
+        mileageSummaryDiv.innerHTML += `
+          <p>
+            Distance: ${data.distance} KM, Mileage: ${data.mileage} KM/L, 
+            Fuel Cost: ₹${data.fuelCost}/L, 
+            Daily Cost: ₹${data.dailyCost.toFixed(2)}, 
+            Monthly Cost: ₹${data.monthlyCost.toFixed(2)}, 
+            Yearly Cost: ₹${data.yearlyCost.toFixed(2)}
+          </p>
+        `;
+      });
+    }
+
+    function updateExcelSheet() {
+      if (!workbook) workbook = XLSX.utils.book_new();
+
+      // Vehicle Profile
+      const vehicleProfileData = [['Vehicle Type', 'Vehicle Name', 'Original Mileage'], [vehicleProfile.type, vehicleProfile.name, vehicleProfile.mileage]];
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(vehicleProfileData), 'Vehicle Profile');
+
+      // Car Service History
+      const carData = [['Date', 'Details'], ...carServiceHistory.map(s => [s.date, formatServiceDetails(s.details)])];
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(carData), 'Car Service History');
+
+      // Bike Service History
+      const bikeData = [['Date', 'Details'], ...bikeServiceHistory.map(s => [s.date, formatServiceDetails(s.details)])];
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(bikeData), 'Bike Service History');
+
+      // Mileage Summary
+      const mileageDataSheet = [['Distance', 'Mileage', 'Fuel Cost', 'Daily Cost', 'Monthly Cost', 'Yearly Cost'], 
+        ...mileageData.map(d => [d.distance, d.mileage, d.fuelCost, d.dailyCost.toFixed(2), d.monthlyCost.toFixed(2), d.yearlyCost.toFixed(2)])];
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(mileageDataSheet), 'Mileage Summary');
+
+      // Overall Summary
+      const overallSummary = [
+        ['Overall Summary'],
+        ['Vehicle Type', vehicleProfile.type],
+        ['Vehicle Name', vehicleProfile.name],
+        ['Original Mileage', vehicleProfile.mileage],
+        ['Service History Count', carServiceHistory.length + bikeServiceHistory.length],
+        ['Mileage Data Count', mileageData.length]
+      ];
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(overallSummary), 'Overall Summary');
+    }
+
+    function downloadExcel() {
+      if (!workbook) {
+        alert('No data to download.');
+        return;
+      }
+      XLSX.writeFile(workbook, 'Mileage_Calculator_Data.xlsx');
+    }
+
+    function updateAndDownloadExcel() {
+      updateExcelSheet();
+      downloadExcel();
+    }
+  </script>
 
 </body>
 </html>
